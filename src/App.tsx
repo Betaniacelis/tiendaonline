@@ -1,0 +1,57 @@
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { CartProvider } from "@/hooks/useCart";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
+import Productos from "./pages/Productos";
+import ProductoDetalle from "./pages/ProductoDetalle";
+import ProductoNuevo from "./pages/ProductoNuevo";
+import Carrito from "./pages/Carrito";
+import MisCompras from "./pages/MisCompras";
+import NotFound from "./pages/NotFound";
+
+const queryClient = new QueryClient();
+
+function AppRoutes() {
+  const { user } = useAuth();
+  return (
+    <CartProvider userId={user?.id ?? null}>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/productos" element={<ProtectedRoute><Productos /></ProtectedRoute>} />
+        <Route path="/productos/nuevo" element={<ProtectedRoute adminOnly><ProductoNuevo /></ProtectedRoute>} />
+        <Route path="/productos/:codigo" element={<ProtectedRoute><ProductoDetalle /></ProtectedRoute>} />
+        <Route path="/carrito" element={<ProtectedRoute><Carrito /></ProtectedRoute>} />
+        <Route path="/mis-compras" element={<ProtectedRoute><MisCompras /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </CartProvider>
+  );
+}
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
+
+export default App;
